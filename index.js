@@ -1,59 +1,50 @@
 import './globals'
+require('crypto')
+
 import { Linking } from 'react-native'
 
-var uportConnect = require('uport-connect/dist/uport-connect')
-const { Connect, SimpleSigner } = uportConnect
-
-const uuidv1 = require('uuid/v1')
-const qs = require('qs')
+import { Connect } from 'uport-connect'
+import { Credentials } from 'uport-credentials'
+import { transport } from 'uport-transports'
 
 const configureUportConnect = (config) => {
 
-  const uriHandler = (url) => {
+  const callbackUrl = `${config.appUrlScheme}://uport/callback`
+  
+  const onloadResponse = () => {
+    return transport.url.parseResponse('')
+  }
+
+  const uportConnect = new Connect(config.appName, {
+    isMobile: true,
+    onloadResponse,
+    useStore: false,
+  })
+  
+  if (config.appAddress && config.privateKey) {
+    uportConnect.credentials = new Credentials({
+      address: config.appAddress,
+      privateKey: config.privateKey
+    })
+  }
+
+  uportConnect.genCallback = (id) => {
+    return `${callbackUrl}%23id=${id}`
+  }
+
+  uportConnect.mobileTransport = (message, {id}) => {
+    const url = message.indexOf(config.appUrlScheme) !== -1 ? 
+      message : `https://id.uport.me/req/${message}?callback_type=redirect&redirect_url=${callbackUrl}%23id=${id}`
     Linking.openURL(url)
   }
 
-  const uport = new Connect(config.appName, {
-    clientId: config.appAddress,
-    signer: SimpleSigner(config.privateKey),
-    mobileUrlHandler: uriHandler,
-    uriHandler: uriHandler,
+  Linking.addEventListener('url', (uri) => {
+    uportConnect.pubResponse(
+      transport.url.parseResponse(uri.url)
+    )
   })
 
-  uport.topicFactory = (name) => {
-    const id = uuidv1()
-    const url = `${config.appAddress}:${id}`
-    let handler
-    let cancel
-    const topic = new Promise((resolve, reject) => {
-      handler = (uri) => {
-        if (uri && uri.url.startsWith(url)) {
-          const decoded = uri.url.replace('%23', '#')
-          const params = qs.parse(decoded.slice(decoded.search(/\#/)+1))
-          if (params && params[name]) {
-            Linking.removeEventListener('url', handler)
-            resolve(params[name])
-          } else {
-            reject()
-          }          
-        }
-      }
-      Linking.addEventListener('url', handler)
-
-      cancel = () => {
-        Linking.removeEventListener('url', handler)
-        resolve()
-      }
-    })
-    topic.url = url
-    topic.cancel = cancel
-    return topic
-  }
-
-  return {
-    ...uportConnect,
-    uport,
-  }
+  return uportConnect
 }
 
 export default configureUportConnect
