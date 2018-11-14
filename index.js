@@ -3,8 +3,8 @@ require('crypto')
 
 import { Linking } from 'react-native'
 
-import Connect from 'uport-connect'
-import { Credentials } from 'uport'
+import { Connect } from 'uport-connect'
+import { Credentials } from 'uport-credentials'
 import { transport } from 'uport-transports'
 
 const configureUportConnect = (config) => {
@@ -33,7 +33,8 @@ const configureUportConnect = (config) => {
   }
 
   uportConnect.mobileTransport = (message, {id}) => {
-    const url = `https://id.uport.me/req/${message}?callback_type=redirect&redirect_url=${callbackUrl}%23id=${id}`
+    const url = message.indexOf(config.appUrlScheme) !== -1 ? 
+      message : `https://id.uport.me/req/${message}?callback_type=redirect&redirect_url=${callbackUrl}%23id=${id}`
     Linking.openURL(url)
   }
 
