@@ -11,7 +11,7 @@ Library for integrating uPort into your React Native app
 2. Add `"react-native-uport-connect/babel-preset.js"` to `.babelrc`
 
 3. Configure iOS
-  - Add URL scheme `{YOUR_DAPP_MNID}` to Info.plist
+  - Add URL scheme `mnid{YOUR_DAPP_MNID}` to Info.plist
 
 ```xml
   <key>CFBundleURLTypes</key>
@@ -21,7 +21,7 @@ Library for integrating uPort into your React Native app
       <string>Editor</string>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG</string>
+        <string>mnid2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG</string>
       </array>
     </dict>
   </array>
@@ -41,7 +41,7 @@ Library for integrating uPort into your React Native app
 
 
 4. Configure Android
-  - Add `android:launchMode="singleTask"` and `<data android:scheme="{YOUR_DAPP_MNID}" />` to `src/main/AndroidManifest.xml`
+  - Add `android:launchMode="singleTask"` and `<data android:scheme="mnid{YOUR_DAPP_MNID}" />` to `src/main/AndroidManifest.xml`
 
 ```xml
 <activity
@@ -55,7 +55,7 @@ Library for integrating uPort into your React Native app
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
-    <data android:scheme="2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG" />
+    <data android:scheme="mnid2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG" />
   </intent-filter>
 ```
 
@@ -69,7 +69,7 @@ import Web3 from 'web3'
 
 const uport = configureUportConnect({
   appName: 'uPort Demo',
-  appUrlScheme: '2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG',
+  appUrlScheme: 'mnid2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG',
   appAddress: '2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG',
   privateKey: 'c818c2665a8023102e430ef3b442f1915ed8dc3abcaffbc51c5394f03fc609e2',
 })
