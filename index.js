@@ -19,6 +19,7 @@ const configureUportConnect = (config) => {
     isMobile: true,
     onloadResponse,
     useStore: false,
+    network: config.network || 'mainnet'
   })
   
   if (config.appAddress && config.privateKey) {
