@@ -20,11 +20,12 @@ const configureUportConnect = (config) => {
     onloadResponse,
     useStore: false,
     network: config.network,
+    vc: config.vc,
   })
   
-  if (config.appAddress && config.privateKey) {
+  if (config.did && config.privateKey) {
     uportConnect.credentials = new Credentials({
-      address: config.appAddress,
+      did: config.did,
       privateKey: config.privateKey
     })
   }
@@ -35,7 +36,7 @@ const configureUportConnect = (config) => {
 
   uportConnect.mobileTransport = (message, {id}) => {
     const url = message.indexOf(config.appUrlScheme) !== -1 ? 
-      message : `https://id.uport.me/req/${message}?callback_type=redirect&redirect_url=${callbackUrl}%23id=${id}`
+      message.replace('https://id.uport.me', 'me.uport:') : `me.uport:/req/${message}?callback_type=redirect&redirect_url=${callbackUrl}%23id=${id}`
     Linking.openURL(url)
   }
 
@@ -46,6 +47,10 @@ const configureUportConnect = (config) => {
   })
 
   return uportConnect
+}
+
+export const isUportAppInstalled = () => {
+  return Linking.canOpenURL('me.uport:')
 }
 
 export default configureUportConnect

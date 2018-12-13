@@ -11,7 +11,7 @@ Library for integrating uPort into your React Native app
 2. Add `"react-native-uport-connect/babel-preset.js"` to `.babelrc`
 
 3. Configure iOS
-  - Add URL scheme `mnid{YOUR_DAPP_MNID}` to Info.plist
+  - Add custom URL scheme `uportdemoapp` to Info.plist
 
 ```xml
   <key>CFBundleURLTypes</key>
@@ -21,9 +21,13 @@ Library for integrating uPort into your React Native app
       <string>Editor</string>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>mnid2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG</string>
+        <string>uportdemoapp</string>
       </array>
     </dict>
+  </array>
+  <key>LSApplicationQueriesSchemes</key>
+  <array>
+    <string>me.uport</string>
   </array>
 ```
   - Add this code to `AppDelegate.m`
@@ -55,34 +59,39 @@ Library for integrating uPort into your React Native app
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
-    <data android:scheme="mnid2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG" />
+    <data android:scheme="uportdemoapp" />
   </intent-filter>
 ```
 
 ## Usage
 
-**Warning:** this API will likely change in the near future
-
 ```javascript
-import configureUportConnect from 'react-native-uport-connect'
+import configureUportConnect, { isUportAppInstalled } from 'react-native-uport-connect'
 import Web3 from 'web3'
 
 const uport = configureUportConnect({
   appName: 'uPort Demo',
-  appUrlScheme: 'mnid2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG',
-  appAddress: '2oeXufHGDpU51bfKBsZDdu7Je9weJ3r7sVG',
-  privateKey: 'c818c2665a8023102e430ef3b442f1915ed8dc3abcaffbc51c5394f03fc609e2',
+  appUrlScheme: 'uportdemoapp',
+  did: 'did:ethr:0xa2d0905267a93995ba1b98a449e1aebbbbf1c57f',
+  privateKey: '7ab83c1068eca322c7e15b9137bd80387a1ff1c2307d8ba8b73d822713f67ecb',
+  vc: ['/ipfs/QmcsqEgFwfJE5jo43DW495sKSY9GiYJ2ZstNyjiM3vjvpM'],
 })
 
 const web3 = new Web3(uport.getProvider())
 
 uport.onResponse('disclosureReq').then(res => console.log(res.payload))
 
-uport.requestDisclosure({
-  requested: ['name', 'avatar'],
-  accountType: 'keypair',
-  network_id: '0x4',
-  notifications: false,
+isUportAppInstalled().then(isInstalled => {
+  if(isInstalled) {
+    uport.requestDisclosure({
+      requested: ['name', 'avatar'],
+      accountType: 'keypair',
+      network_id: '0x4',
+      notifications: false,
+    })
+  } else {
+    Alert.alert('uPort app not installed')
+  }
 })
 
 ```
